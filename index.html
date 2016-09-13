@@ -1,0 +1,77 @@
+<!doctype html>
+<script>
+  const randomBoolean = () => !!Math.round(Math.random())
+
+  const makeRandomRow = (cells = 101) => {
+    let data = []
+
+    for (let i = 0; i < cells; i++) {
+      data[i] = randomBoolean()
+    }
+
+    return data
+  }
+
+  const addNewRow = (data) => {
+    const parentRow = data[data.length - 1]
+    const newRow = parentRow.slice(0)
+
+    // add rules
+    parentRow.forEach((cell, i) => {
+      const a = i > 0 ? parentRow[i - 1] : parentRow[parentRow.length - 1]
+      const b = cell
+      const c = i < parentRow.length - 2 ? parentRow[i + 1] : parentRow[0]
+
+      newRow[i] = !(
+        (a && b && c) ||
+        (a && !b && c) ||
+        (a && !b && !c) ||
+        (!a && b && !c) ||
+        (!a && !b && c)
+      )
+    })
+
+    return newRow
+  }
+
+  const render = (ctx, data) => {
+    data.forEach((row, y) => {
+      row.forEach((cell, x) => {
+        ctx.fillStyle = cell ? '#3c9' : '#fff'
+        ctx.fillRect(x, y, 1, 1)
+      })
+    })
+  }
+
+  const init = () => {
+    const width = 300
+    const height = 250
+    const scale = 2
+    const data = []
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+
+    canvas.width = width
+    canvas.height = height
+    canvas.setAttribute(
+      'style',
+      `
+        width: ${width * scale}px;
+        height: ${height * scale}px;
+        image-rendering: pixelated
+      `
+    )
+
+    document.body.appendChild(canvas)
+
+    data.push(makeRandomRow(width))
+
+    for (let i = 0; i < height; i++) {
+      data.push(addNewRow(data))
+    }
+
+    render(ctx, data)
+  }
+
+  window.onload = init
+</script>
